@@ -17,18 +17,15 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 
 
-app.get('/', 
-(req, res) => {
+app.get('/', (req, res) => {
   res.render('index');
 });
 
-app.get('/create', 
-(req, res) => {
+app.get('/create', (req, res) => {
   res.render('index');
 });
 
-app.get('/links', 
-(req, res, next) => {
+app.get('/links', (req, res, next) => {
   models.Links.getAll()
     .then(links => {
       res.status(200).send(links);
@@ -38,8 +35,7 @@ app.get('/links',
     });
 });
 
-app.post('/links', 
-(req, res, next) => {
+app.post('/links', (req, res, next) => {
   var url = req.body.url;
   if (!models.Links.isValidUrl(url)) {
     // send back a 404 if link is not valid
@@ -77,6 +73,74 @@ app.post('/links',
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
+app.get('/signup', (req, res) => {
+  res.render('signup');
+});
+
+// post request for creating new user, route = /signup
+app.post('/signup', (req, res) => {
+  // call ./model/user.js --> create function
+  var username = req.body.username;
+  var password = req.body.password;
+
+  // var newUser = models.Users; // instantiate a user instance (?)
+
+  // need to check if user existed before create a new credential in database
+  return models.Users.get({username})
+    .then((user) => {
+      if (user) {
+        throw user;
+      }
+      return models.Users.create({username, password});
+    })
+    .then(() => {
+      res.set("location", '/');
+      res.sendStatus(200);
+    })
+    .error(error => {
+      res.status(500).send(error);
+    })
+    .catch(user => {
+      res.set("location", '/signup');
+      res.status(200).send(user);
+    });
+});
+
+app.get('/login', (req, res) => {
+  res.render('login');
+});
+
+app.post('/login', (req, res) => {
+  var username = req.body.username;
+  var attempted = req.body.password;
+
+  return models.Users.get({username})
+    .then((result) => {
+      // if user doesn't exist, result = undefined
+      if (result) {
+        return models.Users.compare(attempted, result.password, result.salt);
+      }
+      throw result;
+    })
+    .then((passwordMatch) => {
+      if (passwordMatch) {
+        res.set("location", '/');
+        res.sendStatus(200);
+      } else {
+        res.set("location", '/login');
+        res.status(500).send('Password is incorrect!');
+      }
+    })
+    .error(error => {
+      res.set("location", '/login');
+      res.status(500).send(error);
+    })
+    .catch(result => {
+      res.set("location", '/login');
+      res.status(200).send(result);
+    });
+});
+
 
 
 

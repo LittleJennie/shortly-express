@@ -41,9 +41,10 @@ class Users extends Model {
       salt,
       password: utils.createHash(password, salt)
     };
-
     return super.create.call(this, newUser);
+
   }
+
 }
 
 module.exports = new Users();
