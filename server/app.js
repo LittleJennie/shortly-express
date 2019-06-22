@@ -131,10 +131,6 @@ app.post('/login', (req, res) => {
         res.status(500).send('Password is incorrect!');
       }
     })
-    .error(error => {
-      res.set("location", '/login');
-      res.status(500).send(error);
-    })
     .catch(result => {
       res.set("location", '/login');
       res.status(200).send(result);
