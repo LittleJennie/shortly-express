@@ -8,6 +8,7 @@ const parseCookies = (req, res, next) => {
     // 2. separate key and cookie string by '='
 
     req.cookies = {};
+    req.headers.cookie = req.headers.cookie || '';
     var incomingCookiesArr = req.headers.cookie.split('; ');
     
     incomingCookiesArr.forEach((cookie) => {

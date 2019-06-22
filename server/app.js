@@ -16,6 +16,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 
 
+app.use(require('./middleware/cookieParser'));
+app.use(Auth.createSession);
 
 app.get('/', (req, res) => {
   res.render('index');
@@ -94,14 +96,14 @@ app.post('/signup', (req, res) => {
       return models.Users.create({username, password});
     })
     .then(() => {
-      res.set("location", '/');
+      res.set('location', '/');
       res.sendStatus(200);
     })
     .error(error => {
       res.status(500).send(error);
     })
     .catch(user => {
-      res.set("location", '/signup');
+      res.set('location', '/signup');
       res.status(200).send(user);
     });
 });
@@ -124,15 +126,15 @@ app.post('/login', (req, res) => {
     })
     .then((passwordMatch) => {
       if (passwordMatch) {
-        res.set("location", '/');
+        res.set('location', '/');
         res.sendStatus(200);
       } else {
-        res.set("location", '/login');
+        res.set('location', '/login');
         res.status(500).send('Password is incorrect!');
       }
     })
     .catch(result => {
-      res.set("location", '/login');
+      res.set('location', '/login');
       res.status(200).send(result);
     });
 });

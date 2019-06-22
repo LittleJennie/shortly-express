@@ -15,18 +15,32 @@ const Promise = require('bluebird');
 // If an incoming cookie is not valid, what do you think you should do with that session and cookie?
 
 module.exports.createSession = (req, res, next) => {
-  console.log('cookies: ', req.cookies);
   if ((Object.keys(req.cookies)).length === 0) {
     return models.Sessions.create()
-      .then(() => {
-        models.Sessions.get();
+      .then((result) => {
+        var id = result.insertId;
+        return models.Sessions.get({id});
+      })
+      .tap((queryResult) => {
+        req.session = {};
+        req.session = queryResult;
+      })
+      .tap((session) => {
+        res.cookie('shortlyid', session.hash);
+        next();
       });
   } else {
-      
+    var hash = req.cookies.shortlyid;
+    return models.Sessions
+      .get({hash})
+      .then((hash) => {
+        req.session = hash;
+        res.cookie('shortlyid', hash);
+        next();
+      });
   }
 };
 
 /************************************************************/
 // Add additional authentication middleware functions below
 /************************************************************/
-
